@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -eo pipefail
+
+# This script initializes the python runtime and starts the extension process
+
+if [[ $LD_LIBRARY_PATH != *python* ]]; then
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python-runtime/lang/lib
+  export PYTHONPATH=$PYTHONPATH:/opt/extension-python-modules:/opt/python-runtime/runtime
+fi
+
+if [ -f /var/lang/bin/python ]; then
+  /var/lang/bin/python /opt/extension-python-modules/lambda_log_shipper/extension_main.py
+else
+  /opt/python-runtime/lang/bin/python3.8 /opt/extension-python-modules/lambda_log_shipper/extension_main.py
+fi
