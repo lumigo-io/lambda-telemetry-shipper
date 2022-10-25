@@ -1,6 +1,6 @@
 import pytest
 
-from lambda_log_shipper.configuration import parse_env, parse_env_to_int
+from lambda_telemetry_shipper.configuration import parse_env, parse_env_to_int
 
 
 def test_parse_env_exists(monkeypatch):

@@ -1,7 +1,7 @@
 import pytest
 
-from lambda_log_shipper.handlers.base_handler import LogRecord
-from lambda_log_shipper.logs_manager import LogsManager
+from lambda_telemetry_shipper.telemetry_handlers.logs_manager import LogsManager
+from lambda_telemetry_shipper.utils import TelemetryRecord
 
 
 @pytest.fixture(autouse=True)
@@ -23,11 +23,11 @@ def clear_logs_manager(monkeypatch):
 def raw_record():
     return {
         "time": "2020-11-02T12:02:04.575Z",
-        "type": "platform.start",
+        "type": "function",
         "record": {"requestId": "1-2-3-4", "version": "$LATEST"},
     }
 
 
 @pytest.fixture
 def record(raw_record):
-    return LogRecord.parse(raw_record)
+    return TelemetryRecord.parse(raw_record)

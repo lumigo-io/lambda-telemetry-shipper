@@ -1,23 +1,24 @@
 from datetime import datetime
 from typing import List
 
-from lambda_log_shipper.handlers.base_handler import LogRecord, LogsHandler
-from lambda_log_shipper.configuration import Configuration
-from lambda_log_shipper.utils import get_logger
+from lambda_telemetry_shipper.configuration import Configuration
+from lambda_telemetry_shipper.export_logs_handlers.base_handler import ExportLogsHandler
+from lambda_telemetry_shipper.telemetry_handlers.base_handler import TelemetryHandler
+from lambda_telemetry_shipper.utils import get_logger, TelemetryRecord, LogType
 
 
-class LogsManager:
-    _singleton = None
-
+class LogsManager(TelemetryHandler):
     def __init__(self):
         self.last_sent_time: datetime = datetime.now()
-        self.pending_logs: List[LogRecord] = []
+        self.pending_logs: List[TelemetryRecord] = []
         self.pending_logs_size: int = 0
 
-    def add_records(self, raw_records: List[dict]):
-        new_records = [LogRecord.parse(r) for r in raw_records]
-        self.pending_logs.extend(new_records)
-        self.pending_logs_size += sum((len(r.record) for r in new_records), 0)
+    def should_handle(self, record: TelemetryRecord) -> bool:
+        return record.record_type == LogType.FUNCTION
+
+    def handle(self, record: TelemetryRecord) -> None:
+        self.pending_logs.append(record)
+        self.pending_logs_size += len(record.record)
 
     def send_batch_if_needed(self) -> bool:
         big_batch = self.pending_logs_size >= Configuration.min_batch_size
@@ -33,10 +34,10 @@ class LogsManager:
         self.last_sent_time = datetime.now()
         if not self.pending_logs:
             return False
-        sorted_logs = sorted(self.pending_logs, key=lambda r: r.log_time)
+        sorted_logs = sorted(self.pending_logs, key=lambda r: r.record_time)
         self.pending_logs.clear()
         self.pending_logs_size = 0
-        subclasses = LogsHandler.__subclasses__()
+        subclasses = ExportLogsHandler.__subclasses__()
         get_logger().debug(f"Send logs to handlers: {[c.__name__ for c in subclasses]}")
         for cls in subclasses:
             try:
@@ -48,9 +49,3 @@ class LogsManager:
             else:
                 get_logger().debug(f"{cls.__name__} finished successfully")
         return True
-
-    @staticmethod
-    def get_manager():
-        if not LogsManager._singleton:
-            LogsManager._singleton = LogsManager()
-        return LogsManager._singleton
