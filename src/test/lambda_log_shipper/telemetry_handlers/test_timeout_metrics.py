@@ -38,6 +38,7 @@ def test_should_handle(record, expected):
 @mock_cloudwatch
 def test_handle(monkeypatch):
     monkeypatch.setattr(Configuration, "timeout_target_metric", "my_metric")
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "testFunc")
     record = TelemetryRecord(LogType.RUNTIME_DONE, now, '{"status": "timeout"}', {})
     TimeoutMetricHandler.get_singleton().handle(record)
     TimeoutMetricHandler.get_singleton().handle(record)
@@ -52,6 +53,7 @@ def test_handle(monkeypatch):
                     "Metric": {
                         "Namespace": "Timeouts",
                         "MetricName": "my_metric",
+                        "Dimensions": [{"Name": "FunctionName", "Value": "testFunc"}],
                     },
                     "Period": 300,
                     "Stat": "Sum",

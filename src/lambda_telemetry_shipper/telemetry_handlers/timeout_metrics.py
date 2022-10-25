@@ -1,3 +1,4 @@
+import os
 import json
 
 import boto3
@@ -31,6 +32,14 @@ class TimeoutMetricHandler(TelemetryHandler):
                         "MetricName": Configuration.timeout_target_metric,
                         "Value": 1,
                         "Unit": "Count",
+                        "Dimensions": [
+                            {
+                                "Name": "FunctionName",
+                                "Value": os.environ.get(
+                                    "AWS_LAMBDA_FUNCTION_NAME", "Unknown"
+                                ),
+                            }
+                        ],
                     },
                 ],
             )
