@@ -46,12 +46,18 @@ This process is triggered by the LambdaService with the lambda's logs, which bei
 Our extension is written in python3.7, and our test environment is [pytest](
 https://pytest.org/) and [moto](https://github.com/spulec/moto) to test interaction AWS services.
 
-To add another log-shipping method, open a PR with 4 file changes:
-1. `src/lambda_telemetry_shipper/handlers/your_new_handler.py` - Contains a class that extends `LogsHandler`, and implements the method: `def handle_logs(self, records: List[LogRecord]) -> bool`
-2. `test/lambda_telemetry_shipper/handlers/test_your_new_handler.py` - Contains your tests
-3. Update the file `src/lambda_telemetry_shipper/handlers/__init__.py` With an import to your class
+To add another telemetry-handling method, open a PR with 4 file changes:
+1. `src/lambda_telemetry_shipper/telemetry_handlers/your_new_handler.py` - Contains a class that extends `TelemetryHandler`, and implements the method: `def should_handle(self, record: TelemetryRecord)` and `handle(self, record: TelemetryRecord)`.
+2. `test/lambda_telemetry_shipper/telemetry_handlers/test_your_new_handler.py` - Contains your tests
+3. Update the file `src/lambda_telemetry_shipper/telemetry_handlers/__init__.py` With an import to your class
 4. `src/lambda_telemetry_shipper/configuration.py` - Contains your new configuration properties.
 
-You can run the tests with `./scripts/checks.sh`, which also checks linting and code convensions.
+Similarly, to add another log-shipping method, open a PR with 4 file changes:
+1. `src/lambda_telemetry_shipper/export_logs_handlers/your_new_handler.py` - Contains a class that extends `ExportLogsHandler`, and implements the method: `def handle_logs(self, records: List[LogRecord]) -> bool`
+2. `test/lambda_telemetry_shipper/export_logs_handlers/test_your_new_handler.py` - Contains your tests
+3. Update the file `src/lambda_telemetry_shipper/export_logs_handlers/__init__.py` With an import to your class
+4. `src/lambda_telemetry_shipper/configuration.py` - Contains your new configuration properties.
+
+You can run the tests with `./scripts/checks.sh`, which also checks linting and code conventions.
 
 You can upload a private version of the extension with `./scripts/deploy.sh` for local testing. This script will output the ARN of your local layer.
