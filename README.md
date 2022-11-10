@@ -2,11 +2,11 @@
  <img width="20%" height="20%" src="./logo.svg">
 </p>
 
-> Ship your AWS lambda logs anywhere. The no-code style.
+> Ship your AWS lambda telemetry logs anywhere. The no-code style.
 
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![codecov](https://codecov.io/gh/lumigo-io/lambda-log-shipper/branch/main/graph/badge.svg?token=3Sv1vOyN8W)](https://codecov.io/gh/lumigo-io/lambda-log-shipper)
+[![codecov](https://codecov.io/gh/lumigo-io/lambda-telemetry-shipper/branch/main/graph/badge.svg?token=3Sv1vOyN8W)](https://codecov.io/gh/lumigo-io/lambda-telemetry-shipper)
 
 - [Usage](#usage)
 - [Advanced Configuration](#advanced-configuration)
@@ -16,10 +16,14 @@
 ## Usage
 
 Add the layer to your lambda ([read how](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html#configuration-layers-using)): <br />
-`LAYER_ARN=arn:aws:lambda:<region>:114300393969:layer:lumigo-log-shipper:3`.
+`LAYER_ARN=arn:aws:lambda:<region>:114300393969:layer:lumigo-telemetry-shipper:3`.
 
-Choose a shipping method:
+(Optional) Choose a shipping method:
 * S3 - Set the environment variable `LUMIGO_EXTENSION_LOG_S3_BUCKET` to your target bucket. Don't forget to add proper permissions.
+
+(Optional) Choose other metrics handlers:
+* `LUMIGO_EXTENSION_TIMEOUT_TARGET_METRIC` indicates the name of the cloudwatch metric that we will report timeouts to. Note that the lambda should have permission to add this metric through its role.
+
 
 Please contribute or open us a ticket for more integrations.
 
@@ -42,12 +46,18 @@ This process is triggered by the LambdaService with the lambda's logs, which bei
 Our extension is written in python3.7, and our test environment is [pytest](
 https://pytest.org/) and [moto](https://github.com/spulec/moto) to test interaction AWS services.
 
-To add another log-shipping method, open a PR with 4 file changes:
-1. `src/lambda_log_shipper/handlers/your_new_handler.py` - Contains a class that extends `LogsHandler`, and implements the method: `def handle_logs(self, records: List[LogRecord]) -> bool`
-2. `test/lambda_log_shipper/handlers/test_your_new_handler.py` - Contains your tests
-3. Update the file `src/lambda_log_shipper/handlers/__init__.py` With an import to your class
-4. `src/lambda_log_shipper/configuration.py` - Contains your new configuration properties.
+To add another telemetry-handling method, open a PR with 4 file changes:
+1. `src/lambda_telemetry_shipper/telemetry_handlers/your_new_handler.py` - Contains a class that extends `TelemetryHandler`, and implements the method: `def should_handle(self, record: TelemetryRecord)` and `handle(self, record: TelemetryRecord)`.
+2. `test/lambda_telemetry_shipper/telemetry_handlers/test_your_new_handler.py` - Contains your tests
+3. Update the file `src/lambda_telemetry_shipper/telemetry_handlers/__init__.py` With an import to your class
+4. `src/lambda_telemetry_shipper/configuration.py` - Contains your new configuration properties.
 
-You can run the tests with `./scripts/checks.sh`, which also checks linting and code convensions.
+Similarly, to add another log-shipping method, open a PR with 4 file changes:
+1. `src/lambda_telemetry_shipper/export_logs_handlers/your_new_handler.py` - Contains a class that extends `ExportLogsHandler`, and implements the method: `def handle_logs(self, records: List[LogRecord]) -> bool`
+2. `test/lambda_telemetry_shipper/export_logs_handlers/test_your_new_handler.py` - Contains your tests
+3. Update the file `src/lambda_telemetry_shipper/export_logs_handlers/__init__.py` With an import to your class
+4. `src/lambda_telemetry_shipper/configuration.py` - Contains your new configuration properties.
+
+You can run the tests with `./scripts/checks.sh`, which also checks linting and code conventions.
 
 You can upload a private version of the extension with `./scripts/deploy.sh` for local testing. This script will output the ARN of your local layer.

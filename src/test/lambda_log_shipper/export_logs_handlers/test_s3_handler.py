@@ -5,9 +5,9 @@ import pytest
 from moto import mock_s3
 import boto3
 
-from lambda_log_shipper.handlers.base_handler import LogRecord, LogType
-from lambda_log_shipper.handlers.s3_handler import S3Handler
-from lambda_log_shipper.configuration import Configuration
+from lambda_telemetry_shipper.export_logs_handlers.s3_handler import S3Handler
+from lambda_telemetry_shipper.utils import LogType, TelemetryRecord
+from lambda_telemetry_shipper.configuration import Configuration
 
 
 @pytest.fixture(autouse=True)
@@ -17,19 +17,21 @@ def lambda_name(monkeypatch):
 
 def test_generate_key_name(record):
     t1 = datetime.datetime(2020, 5, 22, 10, 20, 30)
-    r1 = LogRecord(**{**asdict(record), "log_time": t1})
+    r1 = TelemetryRecord(**{**asdict(record), "record_time": t1})
     t2 = datetime.datetime(2020, 5, 22, 10, 20, 35)
-    r2 = LogRecord(**{**asdict(record), "log_time": t2})
+    r2 = TelemetryRecord(**{**asdict(record), "record_time": t2})
 
     key = S3Handler.generate_key_name([r1, r2])
 
-    assert key.startswith("logs/2020/5/22/10/func/20:30:0-")
+    assert key.startswith("logs/2020/5/22/10:20:30:0-")
 
 
 def test_format_records(record):
     t1 = datetime.datetime(2020, 5, 22, 10, 20, 30, 123456)
-    r1 = LogRecord(log_type=LogType.START, log_time=t1, record="a")
-    r2 = LogRecord(log_type=LogType.FUNCTION, log_time=t1, record="b")
+    r1 = TelemetryRecord(record_type=LogType.START, record_time=t1, record="a", raw={})
+    r2 = TelemetryRecord(
+        record_type=LogType.FUNCTION, record_time=t1, record="b", raw={}
+    )
 
     data = S3Handler.format_records([r1, r2])
 
@@ -46,7 +48,7 @@ def test_handle_logs_happy_flow(record, monkeypatch):
     )
 
     t1 = datetime.datetime(2020, 5, 22, 10, 20, 30, 123456)
-    r1 = LogRecord(log_type=LogType.START, log_time=t1, record="a")
+    r1 = TelemetryRecord(record_type=LogType.START, record_time=t1, record="a", raw={})
 
     assert S3Handler().handle_logs([r1])
 

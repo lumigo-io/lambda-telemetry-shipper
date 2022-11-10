@@ -7,7 +7,11 @@ from types import SimpleNamespace
 import urllib
 from unittest.mock import Mock
 
-from lambda_log_shipper.extension_main import register_extension, extension_loop, main
+from lambda_telemetry_shipper.extension_main import (
+    register_extension,
+    extension_loop,
+    main,
+)
 
 
 @pytest.fixture

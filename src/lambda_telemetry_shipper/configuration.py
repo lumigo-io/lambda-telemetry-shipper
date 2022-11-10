@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from lambda_log_shipper.utils import get_logger
+from lambda_telemetry_shipper.utils import get_logger
 
 
 def parse_env(env_name: str, default: Optional[str] = None) -> Optional[str]:
@@ -29,3 +29,8 @@ class Configuration:
 
     # Destination S3 bucket to write the logs. Default None to not publish to S3.
     s3_bucket_arn: Optional[str] = parse_env("LUMIGO_EXTENSION_LOG_S3_BUCKET", None)
+
+    # Destination Cloudwatch metric to write the timeout metrics. Default None to not publish the metric.
+    timeout_target_metric: Optional[str] = parse_env(
+        "LUMIGO_EXTENSION_TIMEOUT_TARGET_METRIC", default=None
+    )

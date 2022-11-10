@@ -2,9 +2,9 @@ import os
 import json
 import urllib.request
 
-from lambda_log_shipper.logs_manager import LogsManager
-from lambda_log_shipper.logs_subscriber import subscribe_to_logs
-from lambda_log_shipper.utils import (
+from lambda_telemetry_shipper.telemetry_handlers.logs_manager import LogsManager
+from lambda_telemetry_shipper.telemetry_subscriber import subscribe_to_telemetry_api
+from lambda_telemetry_shipper.utils import (
     get_logger,
     lambda_service,
     LUMIGO_EXTENSION_NAME,
@@ -33,21 +33,21 @@ def extension_loop(extension_id):
     url = (
         f"http://{os.environ['AWS_LAMBDA_RUNTIME_API']}/2020-01-01/extension/event/next"
     )
-    req = urllib.request.Request(url, headers={HEADERS_ID_KEY: extension_id})
+    ready_request = urllib.request.Request(url, headers={HEADERS_ID_KEY: extension_id})
     while True:
-        event = json.loads(urllib.request.urlopen(req).read())
+        event = json.loads(urllib.request.urlopen(ready_request).read())
         with never_fail("Send initial logs"):
             get_logger().debug(f"Extension got event {event}")
-            LogsManager.get_manager().send_batch_if_needed()
+            LogsManager.get_singleton().send_batch_if_needed()
         if event.get("eventType") == "SHUTDOWN":
             with never_fail("send final batch"):
-                LogsManager.get_manager().send_batch()
+                LogsManager.get_singleton().send_batch()
             break
 
 
 def main():
     extension_id = register_extension()
-    subscribe_to_logs(extension_id)
+    subscribe_to_telemetry_api(extension_id)
     extension_loop(extension_id)
 
 
