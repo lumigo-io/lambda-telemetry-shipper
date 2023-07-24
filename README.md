@@ -36,6 +36,9 @@ Please contribute or open us a ticket for more integrations.
 
 Note: We will ship the logs immediately when the container is shutting down. Therefore, log files can be smaller and more frequent than the above configuration.
 
+(Optional) Disable S3 logging prefix:
+* `LUMIGO_EXTENSION_DISABLE_LOG_PREFIX` (default `False`) indicates the target file should not include the timestampe and record type.
+
 ## How it works
 
 We use the [new extensions feature](https://lumigo.io/blog/aws-lambda-extensions-what-are-they-and-why-do-they-matter/) to trigger a new process that handles your logs.

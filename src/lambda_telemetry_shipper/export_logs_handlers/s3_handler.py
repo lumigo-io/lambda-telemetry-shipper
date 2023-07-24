@@ -35,4 +35,7 @@ class S3Handler(ExportLogsHandler):
 
     @staticmethod
     def _format_record(r: TelemetryRecord):
+        if Configuration.disable_log_prefix:
+            return r.record
+
         return f"{r.record_time.isoformat():{TIME_PADDING}}{r.record_type.value:{TYPE_PADDING}}{r.record}"

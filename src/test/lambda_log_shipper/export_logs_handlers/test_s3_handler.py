@@ -39,6 +39,21 @@ def test_format_records(record):
     assert data.decode() == expected
 
 
+def test_format_records_with_prefix_disabled(record, monkeypatch):
+    monkeypatch.setattr(Configuration, "disable_log_prefix", True)
+
+    t1 = datetime.datetime(2020, 5, 22, 10, 20, 30, 123456)
+    r1 = TelemetryRecord(record_type=LogType.START, record_time=t1, record="a", raw={})
+    r2 = TelemetryRecord(
+        record_type=LogType.FUNCTION, record_time=t1, record="b", raw={}
+    )
+
+    data = S3Handler.format_records([r1, r2])
+
+    expected = "a\nb"
+    assert data.decode() == expected
+
+
 @mock_s3
 def test_handle_logs_happy_flow(record, monkeypatch):
     s3 = boto3.client("s3", region_name="us-west-2")
