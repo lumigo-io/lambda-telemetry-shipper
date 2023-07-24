@@ -10,7 +10,7 @@ def parse_env(env_name: str, default: Optional[str] = None) -> Optional[str]:
 
 def parse_env_to_bool(env_name: str, default: bool) -> bool:
     try:
-        if parse_env(env_name) == 'True':
+        if parse_env(env_name, default="").lower() == "true":
             return True
         return default
     except Exception:
