@@ -36,7 +36,7 @@ def test_parse_env_to_int_not_exists(monkeypatch):
         ("False", False),
         ("True", True),
         ("false", False),
-        ("true", False),
+        ("true", True),
         ("bad_value", False),
     ],
 )
