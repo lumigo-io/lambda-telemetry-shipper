@@ -40,7 +40,7 @@ def test_format_records(record):
 
 
 def test_format_records_with_prefix_disabled(record, monkeypatch):
-    monkeypatch.setattr(Configuration, "disable_log_prefix", "true")
+    monkeypatch.setattr(Configuration, "disable_log_prefix", True)
 
     t1 = datetime.datetime(2020, 5, 22, 10, 20, 30, 123456)
     r1 = TelemetryRecord(record_type=LogType.START, record_time=t1, record="a", raw={})
