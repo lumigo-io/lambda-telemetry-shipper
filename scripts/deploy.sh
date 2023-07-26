@@ -10,6 +10,8 @@ if [ -n "$CI" ]; then
   echo ${KEY} | gpg --batch -d --passphrase-fd 0 ${enc_location} > ~/.aws/credentials
   unset AWS_ACCESS_KEY_ID
   unset AWS_SECRET_ACCESS_KEY
+else
+  echo "- Use default credentials"
 fi
 pushd src > /dev/null || exit
 
